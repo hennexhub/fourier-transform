@@ -8,7 +8,7 @@ const PresetsControl = () => {
 
     const isMobile = useIsMobile();
 
-
+    console.log('updates for some reason');
 
     return (
         <div className={'mt-20 z-[999]'}>

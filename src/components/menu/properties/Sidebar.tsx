@@ -23,7 +23,9 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
     const id = useIdStore((state) => state.activeId);
 
     const addPathWithCurrentId = (path: Point[]) => {
-        setPath(id, path)
+        if (id) {
+            setPath(id, path);
+        }
 
     }
 

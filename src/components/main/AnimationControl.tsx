@@ -15,6 +15,8 @@ const AnimationControl = ({width, height, id, isPause, path}: {
     const [viewPort, setViewPort] = useState<ViewPort>();
     const currentRNGSettings = useRNGSettingsStore((state) => state.rngSettingsMap[id])
 
+    console.log(id)
+
     useEffect(() => {
         setViewPort({
             minX: -width / 2,

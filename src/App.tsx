@@ -1,5 +1,5 @@
 import './App.css'
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {HeroUIProvider} from "@heroui/react";
 import AnimationControl from "@/components/main/AnimationControl.tsx";
 import Sidebar from "@/components/menu/properties/Sidebar.tsx";
@@ -38,11 +38,15 @@ function App() {
     const paths = usePathStore((state) => state.paths)
     const addId = useIdStore(state => state.addId);
     const ids = useIdStore(state => state.ids);
+    const setActiveId = useIdStore(state => state.setActiveId);
+    const idRef = useRef<boolean>(false);
+
 
     const onPauseButtonClick = useCallback(() => {
         setPause(prevState => !prevState);
         onOpenChange();
     }, [onOpenChange])
+
 
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
         if (event.code === 'Space') {
@@ -51,13 +55,20 @@ function App() {
         }
     }, [onPauseButtonClick]);
 
+
     useEffect(() => {
-        console.log('id set');
-        const id = uuidv4();
-        addId(id);
-        addColorStrokeSettings(id, {strokeSettings: presets[0].strokes, colorSettings: presets[0].colors});
-        addRNGSettings(id, presets[0].rngSettings);
-    }, [addColorStrokeSettings, addId, addRNGSettings]);
+        setTimeout(() => {
+            if (ids.length === 0 && !idRef.current) {
+                idRef.current = true;
+                console.log('id set');
+                const id = uuidv4();
+                addId(id);
+                setActiveId(id);
+                addColorStrokeSettings(id, {strokeSettings: presets[0].strokes, colorSettings: presets[0].colors});
+                addRNGSettings(id, presets[0].rngSettings);
+            }
+        }, 50)
+    }, [addColorStrokeSettings, addId, addRNGSettings, ids.length, setActiveId]);
 
 
     useEffect(() => {
