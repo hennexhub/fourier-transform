@@ -8,19 +8,24 @@ import {SvgMenu} from "@/components/menu/svg/SvgMenu.tsx";
 import {Point} from "@/model/model.ts";
 import CSVUpload from "@/components/menu/properties/control/components/CSVUpload.tsx";
 import DrawPath from "@/components/menu/properties/control/components/DrawPath.tsx";
+import {useIdStore} from "@/store/active-renderer.store.ts";
 
 interface DrawerProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    setPath: (path: Point[]) => void;
-
+    setPath: (id: string, path: Point[]) => void;
 }
 
 export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
 
     const [selectedSetting, setSelectedSetting] = useState("presets");
     const [selected, setSelected] = useState("presets");
+    const id = useIdStore((state) => state.activeId);
 
+    const addPathWithCurrentId = (path: Point[]) => {
+        setPath(id, path)
+
+    }
 
     const selectionChange = (key: Key) => {
       setSelectedSetting(key.toString())
@@ -29,6 +34,7 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
     const onSVGTabChange = (key: Key) => {
         setSelected(key.toString())
     }
+    if (!id) return null;
 
     return (
         <>
@@ -40,16 +46,16 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
                             <Tabs variant={'underlined'} size={'md'} selectedKey={selectedSetting}
                                   onSelectionChange={selectionChange} aria-label="Options">
                                 <Tab className={'w-full'} key="stroke" title="Strokes ">
-                                    <StrokeControl/>
+                                    <StrokeControl id={id}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="color" title="Color ">
-                                    <ColorControl/>
+                                    <ColorControl id={id}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="rng" title="RNG">
-                                    <RNGControl/>
+                                    <RNGControl id={id}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="presets" title="Presets">
-                                    <PresetsControl/>
+                                    <PresetsControl />
                                 </Tab>
                             </Tabs>
                         </div>
@@ -57,13 +63,13 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
                             <Tabs variant={'underlined'} size={'md'} selectedKey={selected}
                                   onSelectionChange={onSVGTabChange} aria-label="Options">
                                 <Tab className={'w-full'} key="stroke" title="Upload ">
-                                    <CSVUpload setPath={setPath}/>
+                                    <CSVUpload setPath={addPathWithCurrentId}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="draw" title="Draw">
-                                    <DrawPath setPath={setPath}/>
+                                    <DrawPath setPath={addPathWithCurrentId}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="presets" title="Pictures">
-                                    <SvgMenu setPath={setPath}/>
+                                    <SvgMenu id={id} setPath={addPathWithCurrentId}/>
                                 </Tab>
 
                             </Tabs>

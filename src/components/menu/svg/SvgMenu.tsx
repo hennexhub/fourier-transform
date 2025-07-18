@@ -3,7 +3,7 @@ import {useEffect, useRef, useState} from "react";
 import Papa from "papaparse";
 import StaticSVGPathRenderer from "@/components/fourier/StaticSVGPathRenderer.tsx";
 import {transformNumberArrayToDimensions} from "@/components/menu/csv.helper.ts";
-import {useSettings} from "@/context/SettingsContext.tsx";
+import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "@/components/ui/carousel.tsx";
 import {Card, CardContent} from "@/components/ui/card.tsx";
 import {useIsMobile} from "@/hooks/use-mobile.tsx";
@@ -14,15 +14,16 @@ interface CsvRow {
 }
 
 export const SvgMenu = ({
-                            setPath
+                            setPath, id
                         }: {
-    setPath: (path: Point[]) => void;
+    setPath: (path: Point[]) => void, id: string
 }) => {
     const fileNames = ['chess.csv', 'star.csv', 'wildForm.csv'];
     const [pathArray, setPathArray] = useState<Point[][]>([]);
-    const {currentColorSettings, currentStrokeSettings} = useSettings();
     const dataFetched = useRef(false);
     const isMobile = useIsMobile();
+    const currentColorSettings = useColorStrokeStore((state) => state.settingsMap[id].colorSettings);
+    const currentStrokeSettings = useColorStrokeStore((state) => state.settingsMap[id].strokeSettings);
 
 
     const fetchCSV = async (fileName: string) => {

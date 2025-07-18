@@ -26,7 +26,7 @@ const StaticSVGPathRenderer: React.FC<StaticSVGProps> = ({
                 const pathD = `M ${inputPath[0].x} ${inputPath[0].y} ` + inputPath.slice(1).map(p => `L ${p.x} ${p.y}`).join(" ");
                 setPath(pathD)
             }
-        }, [ colors, strokes, path]);
+        }, [colors, strokes, path, inputPath]);
 
 
         return (

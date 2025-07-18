@@ -1,22 +1,23 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import Circle from "./Circle.tsx";
 import {FourierTransform, ICircle, Point, ViewPort} from "@/model/model.ts";
 import {getHslString, getViewPortString, renderPath} from "@/components/fourier/helpers.ts";
-import {useSettings} from "@/context/SettingsContext.tsx";
+import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
 
 
 type FourierWrapperProps = {
     isPause: boolean;
     viewPort: ViewPort;
     inputPath: Point[];
-
+    id: string
 }
 
 
 const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
                                                                      isPause,
                                                                      viewPort,
-                                                                     inputPath
+                                                                     inputPath,
+                                                                     id,
                                                                  }) => {
         const svgRef = useRef<SVGSVGElement>(null);
         const pathRef = useRef<SVGPathElement>(null);
@@ -28,84 +29,10 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
         const [stepIncrement, setStepIncrement] = useState(0);
         const [animationSpeed, setAnimationSpeed] = useState(16.67);
         const [isCompleteCycle, setIsCompleteCycle] = useState(false);
-        const {currentStrokeSettings, currentColorSettings} = useSettings();
+        const currentColorSettings = useColorStrokeStore((state) => state.settingsMap[id].colorSettings);
+        const currentStrokeSettings = useColorStrokeStore((state) => state.settingsMap[id].strokeSettings);
 
-
-        useEffect(() => {
-            setIsCompleteCycle(false);
-            setCurrentFrequency(0);
-            setStepIncrement(0);
-            setFourierSteps(undefined)
-            setPath([]);
-            setCircles([]);
-            setNewViewPort(viewPort)
-            setAnimationSpeed(16.67);
-            if (inputPath) {
-                const fourierCoefficient = generateFourierProps(inputPath);
-                fourierCoefficient.sort((a, b) => {
-                    return b.radius - a.radius;
-                })
-                setFourierSteps(fourierCoefficient);
-                setCircles(renderCircles(0, fourierCoefficient));
-            }
-        }, [inputPath]);
-
-        const generateFourierProps = (
-            points: Point[],
-        ) => {
-            const fourierPoints: FourierTransform[] = [];
-            const N = points.length;
-            for (let k = 0; k < N; k++) {
-                const sum = {re: 0, im: 0};
-                for (let n = 0; n < N; n++) {
-                    const angle = (2 * Math.PI * k * n) / N;
-                    sum.re += points[n].x * Math.cos(angle) + points[n].y * Math.sin(angle);
-                    sum.im += -points[n].x * Math.sin(angle) + points[n].y * Math.cos(angle);
-                }
-                sum.re /= N;
-                sum.im /= N;
-
-                const amplitude = Math.sqrt(sum.re ** 2 + sum.im ** 2);
-                const phase = Math.atan2(sum.im, sum.re);
-                fourierPoints.push({radius: amplitude, frequency: k, phase: phase});
-            }
-            setStepIncrement(1 / fourierPoints.length)
-            return fourierPoints;
-        }
-
-        useEffect(() => {
-            let animationFrameId: number;
-            let lastUpdateTime = performance.now();
-
-            const animate = () => {
-                const now = performance.now();
-                if (!isPause) {
-                    if (now - lastUpdateTime >= animationSpeed) {
-                        setCurrentFrequency(prevState => prevState + stepIncrement);
-                        lastUpdateTime = now;
-                    }
-                    animationFrameId = requestAnimationFrame(animate);
-                }
-            };
-            if (!isPause) {
-                animationFrameId = requestAnimationFrame(animate);
-            }
-            return () => {
-                cancelAnimationFrame(animationFrameId);
-            };
-        }, [isPause, fourierSteps]);
-
-        useEffect(() => {
-            if (!fourierSteps) {
-                return;
-            }
-            if (currentFrequency >= 1) {
-                setIsCompleteCycle(true);
-            }
-            setCircles(renderCircles(currentFrequency, fourierSteps));
-        }, [currentFrequency]);
-
-        const renderCircles = (step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
+        const renderCircles = useCallback((step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
             if (!currentFourier) {
                 return undefined;
             }
@@ -135,15 +62,93 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
                 }
             }
             return newCircles;
+        }, [isCompleteCycle, path])
+
+        const generateFourierProps = (
+            points: Point[],
+        ) => {
+            const fourierPoints: FourierTransform[] = [];
+            const N = points.length;
+            for (let k = 0; k < N; k++) {
+                const sum = {re: 0, im: 0};
+                for (let n = 0; n < N; n++) {
+                    const angle = (2 * Math.PI * k * n) / N;
+                    sum.re += points[n].x * Math.cos(angle) + points[n].y * Math.sin(angle);
+                    sum.im += -points[n].x * Math.sin(angle) + points[n].y * Math.cos(angle);
+                }
+                sum.re /= N;
+                sum.im /= N;
+
+                const amplitude = Math.sqrt(sum.re ** 2 + sum.im ** 2);
+                const phase = Math.atan2(sum.im, sum.re);
+                fourierPoints.push({radius: amplitude, frequency: k, phase: phase});
+            }
+            setStepIncrement(1 / fourierPoints.length)
+            return fourierPoints;
         }
+
+        useEffect(() => {
+            setIsCompleteCycle(false);
+            setCurrentFrequency(0);
+            setStepIncrement(0);
+            setFourierSteps(undefined)
+            setPath([]);
+            setCircles([]);
+            setNewViewPort(viewPort)
+            setAnimationSpeed(16.67);
+            if (inputPath) {
+                const fourierCoefficient = generateFourierProps(inputPath);
+                fourierCoefficient.sort((a, b) => {
+                    return b.radius - a.radius;
+                })
+                setFourierSteps(fourierCoefficient);
+                setCircles(renderCircles(0, fourierCoefficient));
+            }
+        }, [inputPath, renderCircles, viewPort]);
+
+
+        useEffect(() => {
+            let animationFrameId: number;
+            let lastUpdateTime = performance.now();
+
+            const animate = () => {
+                const now = performance.now();
+                if (!isPause) {
+                    if (now - lastUpdateTime >= animationSpeed) {
+                        setCurrentFrequency(prevState => prevState + stepIncrement);
+                        lastUpdateTime = now;
+                    }
+                    animationFrameId = requestAnimationFrame(animate);
+                }
+            };
+            if (!isPause) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+            return () => {
+                cancelAnimationFrame(animationFrameId);
+            };
+        }, [isPause, fourierSteps, animationSpeed, stepIncrement]);
+
+        useEffect(() => {
+            if (!fourierSteps) {
+                return;
+            }
+            if (currentFrequency >= 1) {
+                setIsCompleteCycle(true);
+            }
+            setCircles(renderCircles(currentFrequency, fourierSteps));
+        }, [currentFrequency, fourierSteps, renderCircles]);
+
 
         return (
             <div className={'fourier-container'}>
                 {currentColorSettings && currentStrokeSettings ?
-                    <svg style={{backgroundColor: getHslString(currentColorSettings.backgroundColor)}} ref={svgRef} width="100%" height="100%"
+                    <svg style={{backgroundColor: getHslString(currentColorSettings.backgroundColor)}} ref={svgRef}
+                         width="100%" height="100%"
                          viewBox={getViewPortString(newViewPort)}>
                         {circles && circles.length > 0 ? circles.map((item, index) => (
-                            <Circle key={index} circle={item} strokeSettings={currentStrokeSettings} colorSettings={currentColorSettings}/>
+                            <Circle key={index} circle={item} strokeSettings={currentStrokeSettings}
+                                    colorSettings={currentColorSettings}/>
                         )) : null}
                         {path.length > 0 ? <path ref={pathRef} strokeLinejoin={'round'}
                                                  stroke={getHslString(currentColorSettings.pathColor)}

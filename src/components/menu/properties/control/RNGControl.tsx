@@ -1,38 +1,39 @@
 import {SliderWithNumber} from "@/components/menu/properties/control/components/SliderWithNumber.tsx";
-import {useRNGSettings} from "@/context/RNGSettingsContext.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {Switch} from "@heroui/switch";
+import {useRNGSettingsStore} from "@/store/rng_settings.store.ts";
 
-const RNGControl = () => {
+const RNGControl = ({id}: { id: string }) => {
 
-    const {currentRNGSettings, updateCurrentRNGSettings} = useRNGSettings();
+    const updateRNGSettings = useRNGSettingsStore((state) => state.updateRNGSettings);
+    const currentRNGSettings = useRNGSettingsStore((state) => state.rngSettingsMap[id]);
 
     const setNumberOfCircles = (value: number[]) => {
-        updateCurrentRNGSettings({numberOfCircles: value[0]});
+        updateRNGSettings(id, {numberOfCircles: value[0]});
     };
 
     const setMaxRadius = (value: number[]) => {
-        updateCurrentRNGSettings({maxRadius: value[0]});
+        updateRNGSettings(id,{maxRadius: value[0]});
     };
 
     const setRadiusDelta = (value: number[]) => {
-        updateCurrentRNGSettings({radiusDelta: value[0]});
+        updateRNGSettings(id, {radiusDelta: value[0]});
     };
 
     const setMaxSpeed = (value: number[]) => {
-        updateCurrentRNGSettings({maxSpeed: value[0]});
+        updateRNGSettings(id, {maxSpeed: value[0]});
     };
 
     const setMinSpeed = (value: number[]) => {
-        updateCurrentRNGSettings({minSpeed: value[0]});
+        updateRNGSettings(id, {minSpeed: value[0]});
     };
 
     const setSpeedDelta = (value: number[]) => {
-        updateCurrentRNGSettings({speedDelta: value[0]});
+        updateRNGSettings(id, {speedDelta: value[0]});
     };
 
     const setSortCircles = (value: boolean) => {
-        updateCurrentRNGSettings({sortCircles: value});
+        updateRNGSettings(id, {sortCircles: value});
     };
 
     return (

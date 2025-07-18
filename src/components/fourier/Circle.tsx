@@ -17,6 +17,7 @@ const Circle: React.FC<RotatingCircleProps> = ({circle, colorSettings, strokeSet
     const getHslString = (hsl: number[]): string => {
         return `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`;
     }
+
     useEffect(() => {
         if (circle) {
             const circleSvg = d3.select(circleRef.current);

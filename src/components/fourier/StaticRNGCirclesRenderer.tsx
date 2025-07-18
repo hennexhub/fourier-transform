@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {
     ColorSettings,
     FourierTransform,
@@ -31,53 +31,54 @@ const StaticRNGCirclesRenderer: React.FC<StaticSVGProps> = ({
         const [circles, setCircles] = useState<ICircle[]>();
         const [path, setPath] = useState<Point[]>([]);
 
-        useEffect(() => {
+
+    const generateRandomFourierProps = useCallback((fourierProps: FourierTransform[]) => {
+        for (let i = 0; i < properties.numberOfCircles; i++) {
+            const radius = parseFloat((getRandomNumber(1, properties.maxRadius, properties.radiusDelta)).toFixed(3));
+            const phase = parseFloat((getRandomNumber(1, properties.maxRadius, properties.radiusDelta)).toFixed(3));
+            const min = properties.minSpeed;
+            const max = properties.maxSpeed;
+            const frequency = parseFloat(getRandomNumber(min, max, properties.speedDelta).toFixed(3));
+            fourierProps.push({radius: radius, frequency: frequency, phase: phase});
+        }
+        return fourierProps
+    },[properties.maxRadius, properties.maxSpeed, properties.minSpeed, properties.numberOfCircles, properties.radiusDelta, properties.speedDelta])
+
+
+    const renderCircles = useCallback((step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
+        if (!currentFourier) {
+            return undefined;
+        }
+        const newCircles: ICircle[] = [];
+        let prevCircle: ICircle | null = null;
+
+        for (let i = 0; i < currentFourier.length; i++) {
+            const {radius, frequency} = currentFourier[i];
+            const angle = Math.PI * frequency * step;
+            const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(prevCircle.angle) : 0;
+            const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(prevCircle.angle) : 0;
+            const newCircle: ICircle = {
+                centerX,
+                centerY,
+                radius,
+                angle,
+            };
+            newCircles.push(newCircle);
+            prevCircle = newCircle;
+            if (i === currentFourier.length - 1) {
+                const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(angle) : 0;
+                const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(angle) : 0;
+                renderPath(centerX, centerY, pathRef, setPath, path)
+            }
+        }
+        return newCircles;
+    },[path])
+
+
+    useEffect(() => {
             const fourierPoints: FourierTransform[] = [];
             setCircles(renderCircles(10, generateRandomFourierProps(fourierPoints)));
-        }, [properties]);
-
-
-        const generateRandomFourierProps = (fourierProps: FourierTransform[]) => {
-            for (let i = 0; i < properties.numberOfCircles; i++) {
-                const radius = parseFloat((getRandomNumber(1, properties.maxRadius, properties.radiusDelta)).toFixed(3));
-                const phase = parseFloat((getRandomNumber(1, properties.maxRadius, properties.radiusDelta)).toFixed(3));
-                const min = properties.minSpeed;
-                const max = properties.maxSpeed;
-                const frequency = parseFloat(getRandomNumber(min, max, properties.speedDelta).toFixed(3));
-                fourierProps.push({radius: radius, frequency: frequency, phase: phase});
-            }
-            return fourierProps
-        }
-
-
-        const renderCircles = (step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
-            if (!currentFourier) {
-                return undefined;
-            }
-            const newCircles: ICircle[] = [];
-            let prevCircle: ICircle | null = null;
-
-            for (let i = 0; i < currentFourier.length; i++) {
-                const {radius, frequency} = currentFourier[i];
-                const angle = Math.PI * frequency * step;
-                const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(prevCircle.angle) : 0;
-                const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(prevCircle.angle) : 0;
-                const newCircle: ICircle = {
-                    centerX,
-                    centerY,
-                    radius,
-                    angle,
-                };
-                newCircles.push(newCircle);
-                prevCircle = newCircle;
-                if (i === currentFourier.length - 1) {
-                    const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(angle) : 0;
-                    const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(angle) : 0;
-                    renderPath(centerX, centerY, pathRef, setPath, path)
-                }
-            }
-            return newCircles;
-        }
+        }, [generateRandomFourierProps, properties, renderCircles]);
 
 
         return (

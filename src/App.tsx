@@ -1,10 +1,18 @@
 import './App.css'
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {HeroUIProvider} from "@heroui/react";
-import {SettingsProvider} from './context/SettingsContext';
-import {RNGSettingsContext} from "@/context/RNGSettingsContext.tsx";
-import {ActiveRendererIdProvider} from "@/context/ActiveRendererContext.tsx";
-import Main from "@/components/main/Main.tsx";
+import AnimationControl from "@/components/main/AnimationControl.tsx";
+import Sidebar from "@/components/menu/properties/Sidebar.tsx";
+import {useDisclosure} from "@heroui/modal";
+import {Point} from "@/model/model.ts";
+import {transformPathToDimensions} from "@/components/menu/csv.helper.ts";
+import MouseTracker from "@/components/ui/MouseTracker.tsx";
+import {v4 as uuidv4} from "uuid";
+import {useIdStore} from "@/store/active-renderer.store.ts";
+import {presets} from "@/presets.ts";
+import {useRNGSettingsStore} from "@/store/rng_settings.store.ts";
+import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
+import {usePathStore} from "@/store/path.store.ts";
 
 
 export const useWindowSize = () => {
@@ -19,23 +27,64 @@ export const useWindowSize = () => {
     return size;
 };
 
+
 function App() {
     const {width, height} = useWindowSize();
+    const {isOpen, onOpenChange} = useDisclosure();
+    const [isPause, setPause] = useState(false);
+    const addRNGSettings = useRNGSettingsStore((state) => state.addRNGSettings)
+    const addColorStrokeSettings = useColorStrokeStore((state) => state.addColorStrokeSettings)
+    const addPath = usePathStore((state) => state.addPath)
+    const paths = usePathStore((state) => state.paths)
+    const addId = useIdStore(state => state.addId);
+    const ids = useIdStore(state => state.ids);
+
+    const onPauseButtonClick = useCallback(() => {
+        setPause(prevState => !prevState);
+        onOpenChange();
+    }, [onOpenChange])
+
+    const handleKeyDown = useCallback((event: KeyboardEvent) => {
+        if (event.code === 'Space') {
+            event.preventDefault();
+            onPauseButtonClick();
+        }
+    }, [onPauseButtonClick]);
+
+    useEffect(() => {
+        console.log('id set');
+        const id = uuidv4();
+        addId(id);
+        addColorStrokeSettings(id, {strokeSettings: presets[0].strokes, colorSettings: presets[0].colors});
+        addRNGSettings(id, presets[0].rngSettings);
+    }, [addColorStrokeSettings, addId, addRNGSettings]);
 
 
+    useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [handleKeyDown]);
 
+
+    const adjustPathToViewPort = (id: string, path: Point[]) => {
+        const transformedPath = transformPathToDimensions(path, width, height);
+        if (transformedPath) {
+            addPath(id, path);
+        }
+    };
     return (
         <>
             <HeroUIProvider>
-                <ActiveRendererIdProvider>
-                    <SettingsProvider>
-                        <RNGSettingsContext>
-                            <main>
-                                <Main  width={width} height={height} />
-                            </main>
-                        </RNGSettingsContext>
-                    </SettingsProvider>
-                </ActiveRendererIdProvider>
+                <>
+                    <Sidebar setPath={adjustPathToViewPort} isOpen={isOpen} onOpenChange={onOpenChange}/>
+                    {ids && ids.map((id, index) => (
+                        <AnimationControl isPause={isPause} key={index} width={width} height={height} path={paths[id]}
+                                          id={id}/>
+                    ))}
+                    <MouseTracker isPaused={isPause} onClick={onPauseButtonClick}/>
+                </>
             </HeroUIProvider>
         </>
     );

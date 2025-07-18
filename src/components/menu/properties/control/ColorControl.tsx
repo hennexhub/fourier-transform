@@ -1,44 +1,44 @@
 import {ColorPicker} from "@/components/menu/properties/control/components/ColorPicker.tsx";
-import {useSettings} from "@/context/SettingsContext.tsx";
+import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
 import {HslColor} from "react-colorful";
 
-const ColorControl = () => {
-
-    const {updateCurrentColorSettings, currentColorSettings} = useSettings();
+const ColorControl = ({id}: { id: string }) => {
+    const colorSettings = useColorStrokeStore((state) => state.settingsMap[id].colorSettings);
+    const updateStrokeSettings = useColorStrokeStore((state) => state.updateColorSettings);
 
     const setCircleColor = (color: HslColor) => {
-        updateCurrentColorSettings({circleColor: [color.h, color.s, color.l]});
+        updateStrokeSettings(id, {circleColor: [color.h, color.s, color.l]});
     };
 
     const setRadiusColor = (color: HslColor) => {
-        updateCurrentColorSettings({radiusColor: [color.h, color.s, color.l]});
+        updateStrokeSettings(id, {radiusColor: [color.h, color.s, color.l]});
     };
 
     const setJointPointColor = (color: HslColor) => {
-        updateCurrentColorSettings({jointPointColor: [color.h, color.s, color.l]});
+        updateStrokeSettings(id, {jointPointColor: [color.h, color.s, color.l]});
     };
 
     const setBackgroundColor = (color: HslColor) => {
-        updateCurrentColorSettings({backgroundColor: [color.h, color.s, color.l]});
+        updateStrokeSettings(id, {backgroundColor: [color.h, color.s, color.l]});
     };
 
     const setPathColor = (color: HslColor) => {
-        updateCurrentColorSettings({pathColor: [color.h, color.s, color.l]});
+        updateStrokeSettings(id, {pathColor: [color.h, color.s, color.l]});
     };
 
     return (
         <>
-            {currentColorSettings ?
+            {colorSettings ?
                 <div className={'flex flex-col gap-2.5'}>
-                    <ColorPicker label={'Circle'} color={currentColorSettings.circleColor}
+                    <ColorPicker label={'Circle'} color={colorSettings.circleColor}
                                  setColor={(color) => setCircleColor(color)}/>
-                    <ColorPicker label={'Radius'} color={currentColorSettings.radiusColor}
+                    <ColorPicker label={'Radius'} color={colorSettings.radiusColor}
                                  setColor={setRadiusColor}/>
-                    <ColorPicker label={'Joint point'} color={currentColorSettings.jointPointColor}
+                    <ColorPicker label={'Joint point'} color={colorSettings.jointPointColor}
                                  setColor={setJointPointColor}/>
-                    <ColorPicker label={'Background'} color={currentColorSettings.backgroundColor}
+                    <ColorPicker label={'Background'} color={colorSettings.backgroundColor}
                                  setColor={setBackgroundColor}/>
-                    <ColorPicker label={'Path'} color={currentColorSettings.pathColor}
+                    <ColorPicker label={'Path'} color={colorSettings.pathColor}
                                  setColor={setPathColor}/>
                 </div> : null
             }
