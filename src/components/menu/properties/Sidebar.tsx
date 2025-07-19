@@ -57,7 +57,7 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
                                     <RNGControl id={id}/>
                                 </Tab>
                                 <Tab className={'w-full'} key="presets" title="Presets">
-                                    <PresetsControl />
+                                    <PresetsControl id={id}/>
                                 </Tab>
                             </Tabs>
                         </div>

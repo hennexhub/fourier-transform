@@ -4,16 +4,14 @@ import {immer} from 'zustand/middleware/immer'
 import {persist} from 'zustand/middleware'
 
 
-type RNGSettingsMap = Record<string, RNGCirclesSettings>;
-
 interface RNGSettingsState {
-    rngSettingsMap: RNGSettingsMap;
+    rngSettingsMap: Record<string, RNGCirclesSettings>;
     addRNGSettings: (id: string, settings: RNGCirclesSettings) => void;
-    activeSettings: RNGSettingsMap | undefined;
+    activeSettings: RNGCirclesSettings | undefined;
     setActiveSettings: (id: string) => void;
     updateRNGSettings: (id: string, updated: Partial<RNGCirclesSettings>) => void;
     removeRNGSettings: (id: string) => void;
-    setRNGSettingsMap: (map: RNGSettingsMap) => void;
+    setRNGSettingsMap: (map: Record<string, RNGCirclesSettings>) => void;
 }
 
 export const useRNGSettingsStore = create<RNGSettingsState>()(
@@ -24,21 +22,25 @@ export const useRNGSettingsStore = create<RNGSettingsState>()(
             setActiveSettings: (id: string) => {
                 const activeSettings = get().rngSettingsMap[id];
                 set(state => {
-                    state.activeSettings = activeSettings;
+                    if (activeSettings) {
+                        state.activeSettings = activeSettings;
+                    }
                 })
             },
             addRNGSettings: (id, settings) => set(state => {
                 state.rngSettingsMap[id] = settings
             }),
-            updateRNGSettings: (id, updatedSettings) =>
-                set(state => {
-                    if (state.rngSettingsMap[id]) {
-                        state.rngSettingsMap[id].rngSettings = {
-                            ...state.rngSettingsMap[id].rngSettings,
-                            ...updatedSettings
+            updateRNGSettings: (id, updatedSettings) => {
+                console.log(get().rngSettingsMap[id]);
+                    set(state => {
+                        if (state.rngSettingsMap[id]) {
+                            state.rngSettingsMap[id] = {
+                                ...state.rngSettingsMap[id],
+                                ...updatedSettings
+                            }
                         }
-                    }
-                }),
+                    })
+            },
             removeRNGSettings: (id) => set(state => {
                 delete state.rngSettingsMap[id]
             }),
