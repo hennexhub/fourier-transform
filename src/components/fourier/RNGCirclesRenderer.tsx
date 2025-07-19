@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import Circle from "./Circle.tsx";
 import {FourierTransform, ICircle, Point, ViewPort} from "@/model/model.ts";
-import {getHslString, getRandomNumber, getViewPortString} from "@/components/fourier/helpers.ts";
+import {getHslString, getRandomNumber, getViewPortString, renderCircles} from "@/components/fourier/helpers.ts";
 import * as d3 from "d3";
 import {useRNGSettingsStore} from "@/store/rng_settings.store.ts";
 import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
@@ -24,30 +24,17 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
         const [fourierSteps, setFourierSteps] = useState<FourierTransform[]>();
         const [circles, setCircles] = useState<ICircle[]>();
         const [currentFrequency, setCurrentFrequency] = useState(0);
-        const [path, setPath] = useState<Point[]>([]);
         const [savedElapsed, setSavedElapsed] = useState(0);
         const currentRNGSettings = useRNGSettingsStore((state) => state.rngSettingsMap[id]);
         const {colorSettings, strokeSettings} = useColorStrokeStore((state) => state.settingsMap[id]);
         const pathArrayRef = useRef<Point[]>([]);
 
-
-        const addToPath = (point: Point) => {
-            setPath(prev => {
-                const updated = [...prev, point];
-                pathArrayRef.current = updated;
-                return updated;
-            });
-        };
-
-
         const renderPath = useCallback((
             x: number,
             y: number,
         ) => {
-            if (!pathRef.current) return;
-
             const graph = d3.select(pathRef.current);
-            addToPath({x, y});
+            pathArrayRef.current.push({x, y});
 
             const pathData = pathArrayRef.current.map((point, index) => {
                 return index === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`;
@@ -80,29 +67,6 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
         }, [currentRNGSettings])
 
 
-        const renderCircles = useCallback((step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
-            if (!currentFourier) {
-                return undefined;
-            }
-            const newCircles: ICircle[] = [];
-            let prevCircle: ICircle | null = null;
-
-            for (let i = 0; i < currentFourier.length; i++) {
-                const {radius, frequency} = currentFourier[i];
-                const angle = Math.PI * frequency * step;
-                const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(prevCircle.angle) : 0;
-                const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(prevCircle.angle) : 0;
-                const newCircle: ICircle = {
-                    centerX,
-                    centerY,
-                    radius,
-                    angle,
-                };
-                newCircles.push(newCircle);
-                prevCircle = newCircle;
-            }
-            return newCircles;
-        }, [])
 
         useEffect(() => {
             let animationFrameId: number;
@@ -141,7 +105,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             setFourierSteps(fourierPoints);
             setCurrentFrequency(0);
             setSavedElapsed(0);
-            setPath([]);
+            pathArrayRef.current = [];
         }, [currentRNGSettings, generateRandomFourierProps]);
 
 
@@ -150,7 +114,8 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                 return;
             }
             if (strokeSettings && strokeSettings.deletePath && currentFrequency > strokeSettings.deletePathDelay + savedElapsed / 1000) {
-                setPath(prev => prev.slice(1));
+                console.log(pathArrayRef.current);
+                pathArrayRef.current = pathArrayRef.current.slice(1);
             }
 
             const newCircles = renderCircles(currentFrequency, fourierSteps);
@@ -162,7 +127,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                 renderPath(endX, endY);
             }
 
-        }, [currentFrequency, strokeSettings, fourierSteps, renderCircles, renderPath, savedElapsed]);
+        }, [currentFrequency, strokeSettings, fourierSteps, renderPath, savedElapsed]);
 
 
         return (
@@ -175,7 +140,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                             <Circle key={index} circle={item} strokeSettings={strokeSettings}
                                     colorSettings={colorSettings}/>
                         )) : null}
-                        {path.length > 0 ? <path ref={pathRef}
+                        {pathArrayRef.current.length > 0 ? <path ref={pathRef}
                                                  stroke={getHslString(colorSettings.pathColor)}
                                                  fill="none"
                                                  strokeWidth={strokeSettings.pathStroke}/> : null

@@ -1,4 +1,4 @@
-import {ColorSettings, Point, RNGCirclesSettings, ViewPort} from "@/model/model.ts";
+import {ColorSettings, FourierTransform, ICircle, Point, RNGCirclesSettings, ViewPort} from "@/model/model.ts";
 import * as d3 from "d3";
 
 export const generateHSLSteps = (startColor: number[], step: number, properties: RNGCirclesSettings): [number, number, number][] => {
@@ -14,7 +14,7 @@ export const generateHSLSteps = (startColor: number[], step: number, properties:
 
 export const getRandomNumber = (min: number, max: number, delta: number) => {
     if (Math.random() < 1 / 20) {
-        return Math.random() * (max + delta - min + delta *-1) + min + delta;
+        return Math.random() * (max + delta - min + delta * -1) + min + delta;
     } else {
         return Math.random() * (max - min) + min;
     }
@@ -28,6 +28,30 @@ export const getHslString = (hsl: number[]): string => {
 export const getViewPortString = (viewPort: ViewPort) => {
     return `${viewPort.minX} ${viewPort.minY} ${viewPort.width} ${viewPort.height}`;
 };
+
+export const renderCircles = (step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
+    if (!currentFourier) {
+        return undefined;
+    }
+    const newCircles: ICircle[] = [];
+    let prevCircle: ICircle | null = null;
+
+    for (let i = 0; i < currentFourier.length; i++) {
+        const {radius, frequency} = currentFourier[i];
+        const angle = Math.PI * frequency * step;
+        const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(prevCircle.angle) : 0;
+        const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(prevCircle.angle) : 0;
+        const newCircle: ICircle = {
+            centerX,
+            centerY,
+            radius,
+            angle,
+        };
+        newCircles.push(newCircle);
+        prevCircle = newCircle;
+    }
+    return newCircles;
+}
 
 
 export const renderPath = (x: number, y: number, pathRef: React.RefObject<SVGPathElement | null>, setPath: React.Dispatch<React.SetStateAction<Point[]>>, path: Point[]) => {

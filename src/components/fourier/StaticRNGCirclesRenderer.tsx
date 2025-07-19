@@ -8,7 +8,7 @@ import {
     StrokeSettings,
     ViewPort
 } from "@/model/model.ts";
-import {getHslString, getRandomNumber, getViewPortString} from "@/components/fourier/helpers.ts";
+import {getHslString, getRandomNumber, getViewPortString, renderCircles} from "@/components/fourier/helpers.ts";
 import Circle from "@/components/fourier/Circle.tsx";
 import * as d3 from "d3";
 
@@ -71,30 +71,6 @@ const StaticRNGCirclesRenderer: React.FC<StaticSVGProps> = ({
         }, [properties.maxRadius, properties.maxSpeed, properties.minSpeed, properties.numberOfCircles, properties.radiusDelta, properties.speedDelta])
 
 
-        const renderCircles = useCallback((step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
-            if (!currentFourier) {
-                return undefined;
-            }
-            const newCircles: ICircle[] = [];
-            let prevCircle: ICircle | null = null;
-
-            for (let i = 0; i < currentFourier.length; i++) {
-                const {radius, frequency} = currentFourier[i];
-                const angle = Math.PI * frequency * step;
-                const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(prevCircle.angle) : 0;
-                const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(prevCircle.angle) : 0;
-                const newCircle: ICircle = {
-                    centerX,
-                    centerY,
-                    radius,
-                    angle,
-                };
-                newCircles.push(newCircle);
-                prevCircle = newCircle;
-            }
-            return newCircles;
-        }, [])
-
 
         useEffect(() => {
             const fourierPoints: FourierTransform[] = [];
@@ -106,7 +82,7 @@ const StaticRNGCirclesRenderer: React.FC<StaticSVGProps> = ({
                 const endY = last.centerY + last.radius * Math.sin(last.angle);
                 renderPath(endX, endY);
             }
-        }, [generateRandomFourierProps, renderCircles, renderPath]);
+        }, [generateRandomFourierProps, renderPath]);
 
 
         return (

@@ -47,7 +47,7 @@ const PinkSolarSystemStrokes: StrokeSettings = {
     radiusStroke: 0,
     pathStroke: 3,
     jointPointStroke: 4,
-    deletePath: true,
+    deletePath: false,
     deletePathDelay: 7,
 };
 
@@ -81,7 +81,7 @@ const BlueWormsStrokes: StrokeSettings = {
     radiusStroke: 0,
     pathStroke: 0,
     jointPointStroke: 2.35,
-    deletePath: true,
+    deletePath: false,
     deletePathDelay: 0,
 };
 
@@ -115,7 +115,7 @@ const WindyTreeStrokes: StrokeSettings = {
     radiusStroke: 2,
     pathStroke: 0,
     jointPointStroke: 3.35,
-    deletePath: true,
+    deletePath: false,
     deletePathDelay: 1,
 };
 
@@ -162,7 +162,7 @@ const SlowGreenCircleStrokes: StrokeSettings = {
     radiusStroke: 3,
     pathStroke: 2.49,
     jointPointStroke: 1,
-    deletePath: true,
+    deletePath: false,
     deletePathDelay: 10,
 };
 
