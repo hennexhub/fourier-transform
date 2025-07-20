@@ -29,6 +29,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
         const {colorSettings, strokeSettings} = useColorStrokeStore((state) => state.settingsMap[id]);
         const pathArrayRef = useRef<Point[]>([]);
 
+        // render the resulting path.
         const renderPath = useCallback((
             x: number,
             y: number,
@@ -43,7 +44,9 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             graph.attr("d", pathData);
         }, []);
 
+        console.log(viewPort);
 
+        // calc circle props for rendering.
         const generateRandomFourierProps = useCallback((fourierProps: FourierTransform[]) => {
             if (!currentRNGSettings) {
                 return;
@@ -67,7 +70,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
         }, [currentRNGSettings])
 
 
-
+        // animation loop
         useEffect(() => {
             let animationFrameId: number;
             let startTime: number | null = null;
@@ -90,13 +93,14 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             };
         }, [isPause, savedElapsed]);
 
-
+        // pause listener
         useEffect(() => {
             if (isPause) {
                 setSavedElapsed(() => currentFrequency * 1000);
             }
         }, [currentFrequency, isPause]);
 
+        // reset
         useEffect(() => {
             if (!currentRNGSettings) return;
 
@@ -108,7 +112,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             pathArrayRef.current = [];
         }, [currentRNGSettings, generateRandomFourierProps]);
 
-
+        // render
         useEffect(() => {
             if (!fourierSteps) {
                 return;
@@ -132,7 +136,7 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
 
         return (
             <div className={'fourier-container'}>
-                {strokeSettings && strokeSettings ?
+                {strokeSettings && colorSettings ?
                     <svg style={{backgroundColor: getHslString(colorSettings.backgroundColor)}} ref={svgRef}
                          width="100%" height="100%"
                          viewBox={getViewPortString(viewPort)}>

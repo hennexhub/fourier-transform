@@ -1,5 +1,4 @@
 import {ColorSettings, FourierTransform, ICircle, Point, RNGCirclesSettings, ViewPort} from "@/model/model.ts";
-import * as d3 from "d3";
 
 export const generateHSLSteps = (startColor: number[], step: number, properties: RNGCirclesSettings): [number, number, number][] => {
     const [h, s, l] = startColor;
@@ -53,18 +52,6 @@ export const renderCircles = (step: number, currentFourier: FourierTransform[]):
     return newCircles;
 }
 
-
-export const renderPath = (x: number, y: number, pathRef: React.RefObject<SVGPathElement | null>, setPath: React.Dispatch<React.SetStateAction<Point[]>>, path: Point[]) => {
-    if (!pathRef) {
-        return;
-    }
-    const graph = d3.select(pathRef.current);
-    setPath((prevPath) => [...prevPath, {x, y}]);
-    const pathData = path.map((point, index) => {
-        return index === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`;
-    }).join(" ");
-    graph.attr("d", pathData);
-};
 
 export const cycleCircleColor = (frequency: number, colors: ColorSettings, circleColorArray: [number, number, number][], properties: RNGCirclesSettings) => {
     if (frequency % 10 > 0 && frequency % 10 < 1 && colors.rotateCircleColor) {

@@ -1,8 +1,9 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import Circle from "./Circle.tsx";
 import {FourierTransform, ICircle, Point, ViewPort} from "@/model/model.ts";
-import {getHslString, getViewPortString, renderPath} from "@/components/fourier/helpers.ts";
+import {getHslString, getViewPortString} from "@/components/fourier/helpers.ts";
 import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
+import * as d3 from "d3";
 
 
 type FourierWrapperProps = {
@@ -24,13 +25,30 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
         const [fourierSteps, setFourierSteps] = useState<FourierTransform[]>();
         const [circles, setCircles] = useState<ICircle[]>();
         const [currentFrequency, setCurrentFrequency] = useState(0);
-        const [path, setPath] = useState<Point[]>(inputPath);
-        const [newViewPort, setNewViewPort] = useState<ViewPort>(viewPort)
         const [stepIncrement, setStepIncrement] = useState(0);
         const [animationSpeed, setAnimationSpeed] = useState(16.67);
         const [isCompleteCycle, setIsCompleteCycle] = useState(false);
         const currentColorSettings = useColorStrokeStore((state) => state.settingsMap[id].colorSettings);
         const currentStrokeSettings = useColorStrokeStore((state) => state.settingsMap[id].strokeSettings);
+
+        const pathArrayRef = useRef<Point[]>([]);
+        const renderPath = useCallback((
+            x: number,
+            y: number,
+        ) => {
+            if (!isCompleteCycle) {
+                const graph = d3.select(pathRef.current);
+                pathArrayRef.current.push({x, y});
+
+                const pathData = pathArrayRef.current.map((point, index) => {
+                    return index === 0 ? `M${point.x},${point.y}` : `L${point.x},${point.y}`;
+                }).join(" ");
+
+                graph.attr("d", pathData);
+            }
+
+        }, [isCompleteCycle]);
+
 
         const renderCircles = useCallback((step: number, currentFourier: FourierTransform[]): ICircle[] | undefined => {
             if (!currentFourier) {
@@ -53,16 +71,10 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
                 };
                 newCircles.push(newCircle);
                 prevCircle = newCircle;
-                if (i === currentFourier.length - 1) {
-                    const centerX = prevCircle ? prevCircle.centerX + prevCircle.radius * Math.cos(angle) : 0;
-                    const centerY = prevCircle ? prevCircle.centerY + prevCircle.radius * Math.sin(angle) : 0;
-                    if (!isCompleteCycle) {
-                        renderPath(centerX, centerY, pathRef, setPath, path);
-                    }
-                }
+
             }
             return newCircles;
-        }, [isCompleteCycle, path])
+        }, [])
 
         const generateFourierProps = (
             points: Point[],
@@ -92,9 +104,7 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
             setCurrentFrequency(0);
             setStepIncrement(0);
             setFourierSteps(undefined)
-            setPath([]);
             setCircles([]);
-            setNewViewPort(viewPort)
             setAnimationSpeed(16.67);
             if (inputPath) {
                 const fourierCoefficient = generateFourierProps(inputPath);
@@ -104,7 +114,7 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
                 setFourierSteps(fourierCoefficient);
                 setCircles(renderCircles(0, fourierCoefficient));
             }
-        }, [inputPath, renderCircles, viewPort]);
+        }, [inputPath, renderCircles]);
 
 
         useEffect(() => {
@@ -136,8 +146,15 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
             if (currentFrequency >= 1) {
                 setIsCompleteCycle(true);
             }
-            setCircles(renderCircles(currentFrequency, fourierSteps));
-        }, [currentFrequency, fourierSteps, renderCircles]);
+            const newCircles = renderCircles(currentFrequency, fourierSteps);
+            setCircles(newCircles);
+            if (newCircles && newCircles.length >= 1) {
+                const last = newCircles[newCircles.length - 1];
+                const endX = last.centerX + last.radius * Math.cos(last.angle);
+                const endY = last.centerY + last.radius * Math.sin(last.angle);
+                renderPath(endX, endY);
+            }
+        }, [currentFrequency, fourierSteps, renderCircles, renderPath]);
 
 
         return (
@@ -145,12 +162,12 @@ const FourierTransformRenderer: React.FC<FourierWrapperProps> = ({
                 {currentColorSettings && currentStrokeSettings ?
                     <svg style={{backgroundColor: getHslString(currentColorSettings.backgroundColor)}} ref={svgRef}
                          width="100%" height="100%"
-                         viewBox={getViewPortString(newViewPort)}>
+                         viewBox={getViewPortString(viewPort)}>
                         {circles && circles.length > 0 ? circles.map((item, index) => (
                             <Circle key={index} circle={item} strokeSettings={currentStrokeSettings}
                                     colorSettings={currentColorSettings}/>
                         )) : null}
-                        {path.length > 0 ? <path ref={pathRef} strokeLinejoin={'round'}
+                        {pathArrayRef.current.length > 0 ? <path ref={pathRef} strokeLinejoin={'round'}
                                                  stroke={getHslString(currentColorSettings.pathColor)}
                                                  fill="none"
                                                  strokeWidth={currentStrokeSettings.pathStroke}/> : null

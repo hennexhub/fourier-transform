@@ -47,7 +47,7 @@ function App() {
         onOpenChange();
     }, [onOpenChange])
 
-
+    // handle key event
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
         if (event.code === 'Space') {
             event.preventDefault();
@@ -57,10 +57,10 @@ function App() {
 
 
     useEffect(() => {
+        //wait for local storage items to be set.
         setTimeout(() => {
             if (ids.length === 0 && !idRef.current) {
                 idRef.current = true;
-                console.log('id set');
                 const id = uuidv4();
                 addId(id);
                 setActiveId(id);
@@ -70,7 +70,7 @@ function App() {
         }, 50)
     }, [addColorStrokeSettings, addId, addRNGSettings, ids.length, setActiveId]);
 
-
+    // key event listener
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
         return () => {

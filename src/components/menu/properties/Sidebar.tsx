@@ -26,7 +26,6 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
         if (id) {
             setPath(id, path);
         }
-
     }
 
     const selectionChange = (key: Key) => {

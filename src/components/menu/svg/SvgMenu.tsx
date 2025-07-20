@@ -13,12 +13,14 @@ interface CsvRow {
     [key: string]: string;
 }
 
+const fileNames = ['chess.csv', 'star.csv', 'wildForm.csv'];
+
+
 export const SvgMenu = ({
                             setPath, id
                         }: {
     setPath: (path: Point[]) => void, id: string
 }) => {
-    const fileNames = ['chess.csv', 'star.csv', 'wildForm.csv'];
     const [pathArray, setPathArray] = useState<Point[][]>([]);
     const dataFetched = useRef(false);
     const isMobile = useIsMobile();

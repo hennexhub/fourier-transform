@@ -2,6 +2,7 @@ import {RNGCirclesSettings} from "@/model/model.ts";
 import {create} from 'zustand'
 import {immer} from 'zustand/middleware/immer'
 import {persist} from 'zustand/middleware'
+import {usePathStore} from "@/store/path.store.ts";
 
 
 interface RNGSettingsState {
@@ -31,7 +32,7 @@ export const useRNGSettingsStore = create<RNGSettingsState>()(
                 state.rngSettingsMap[id] = settings
             }),
             updateRNGSettings: (id, updatedSettings) => {
-                console.log(get().rngSettingsMap[id]);
+                usePathStore.getState().deletePath(id);
                     set(state => {
                         if (state.rngSettingsMap[id]) {
                             state.rngSettingsMap[id] = {
