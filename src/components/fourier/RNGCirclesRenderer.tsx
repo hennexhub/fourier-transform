@@ -44,8 +44,6 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             graph.attr("d", pathData);
         }, []);
 
-        console.log(viewPort);
-
         // calc circle props for rendering.
         const generateRandomFourierProps = useCallback((fourierProps: FourierTransform[]) => {
             if (!currentRNGSettings) {
@@ -59,7 +57,6 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                 const frequency = parseFloat(getRandomNumber(min, max, currentRNGSettings.speedDelta).toFixed(3));
                 fourierProps.push({radius: radius, frequency: frequency, phase: phase});
             }
-            console.log('generateRandomFourierProps reruns');
 
             if (currentRNGSettings.sortCircles) {
                 fourierProps.sort((a, b) => {
@@ -118,7 +115,6 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                 return;
             }
             if (strokeSettings && strokeSettings.deletePath && currentFrequency > strokeSettings.deletePathDelay + savedElapsed / 1000) {
-                console.log(pathArrayRef.current);
                 pathArrayRef.current = pathArrayRef.current.slice(1);
             }
 

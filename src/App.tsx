@@ -1,7 +1,7 @@
 import './App.css'
 import {useCallback, useEffect, useRef, useState} from "react";
 import {HeroUIProvider} from "@heroui/react";
-import AnimationControl from "@/components/main/AnimationControl.tsx";
+import AnimationControl, {ShareableSettings} from "@/components/main/AnimationControl.tsx";
 import Sidebar from "@/components/menu/properties/Sidebar.tsx";
 import {useDisclosure} from "@heroui/modal";
 import {Point} from "@/model/model.ts";
@@ -39,6 +39,7 @@ function App() {
     const addId = useIdStore(state => state.addId);
     const ids = useIdStore(state => state.ids);
     const setActiveId = useIdStore(state => state.setActiveId);
+    const activeId = useIdStore(state => state.activeId);
     const idRef = useRef<boolean>(false);
 
 
@@ -49,26 +50,58 @@ function App() {
 
     // handle key event
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
+
         if (event.code === 'Space') {
             event.preventDefault();
-            onPauseButtonClick();
+            if (!isOpen) {
+                onOpenChange();
+            }
+            setPause(prevState => !prevState);
         }
-    }, [onPauseButtonClick]);
+    }, [isOpen, onOpenChange]);
+
+
+
+    const decodeSettingsFromUrl = (): ShareableSettings | null => {
+        const url = new URL(window.location.href);
+        const base64 = url.searchParams.get("cfg");
+        console.log(base64);
+        if (!base64) return null;
+
+        try {
+            const json = atob(base64);
+            return JSON.parse(json) as ShareableSettings;
+        } catch (e) {
+            console.warn("Failed to decode settings from URL:", e);
+            return null;
+        }
+    };
 
 
     useEffect(() => {
-        //wait for local storage items to be set.
+        const id = uuidv4();
+        const loaded = decodeSettingsFromUrl();
+        console.log('init settings');
+        if (loaded) {
+            console.log(loaded);
+            addId(id);
+            setActiveId(id);
+            addColorStrokeSettings(id, {colorSettings: loaded.color, strokeSettings: loaded.stroke});
+            addRNGSettings(id, loaded.rng);
+            idRef.current = true;
+            return;
+        }
+        //wait for local storage items to be set from the stores.
         setTimeout(() => {
-            if (ids.length === 0 && !idRef.current) {
+            if (!idRef.current) {
                 idRef.current = true;
-                const id = uuidv4();
                 addId(id);
                 setActiveId(id);
                 addColorStrokeSettings(id, {strokeSettings: presets[0].strokes, colorSettings: presets[0].colors});
                 addRNGSettings(id, presets[0].rngSettings);
             }
         }, 50)
-    }, [addColorStrokeSettings, addId, addRNGSettings, ids.length, setActiveId]);
+    }, [addColorStrokeSettings, addId, addRNGSettings, setActiveId]);
 
     // key event listener
     useEffect(() => {
@@ -89,7 +122,7 @@ function App() {
         <>
             <HeroUIProvider>
                 <>
-                    <Sidebar setPath={adjustPathToViewPort} isOpen={isOpen} onOpenChange={onOpenChange}/>
+                    {activeId && <Sidebar setPath={adjustPathToViewPort} isOpen={isOpen} onOpenChange={onOpenChange} id={activeId}/>}
                     {ids && ids.map((id, index) => (
                         <AnimationControl isPause={isPause} key={index} width={width} height={height} path={paths[id]}
                                           id={id}/>

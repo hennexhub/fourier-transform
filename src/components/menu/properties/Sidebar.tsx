@@ -8,24 +8,48 @@ import {SvgMenu} from "@/components/menu/svg/SvgMenu.tsx";
 import {Point} from "@/model/model.ts";
 import CSVUpload from "@/components/menu/properties/control/components/CSVUpload.tsx";
 import DrawPath from "@/components/menu/properties/control/components/DrawPath.tsx";
-import {useIdStore} from "@/store/active-renderer.store.ts";
+import {Button} from "@/components/ui/button.tsx";
+import {ShareableSettings} from "@/components/main/AnimationControl.tsx";
+import {useRNGSettingsStore} from "@/store/rng_settings.store.ts";
+import {useColorStrokeStore} from "@/store/color_stroke.store.ts";
+import {ShareURLDialog} from "@/components/menu/properties/control/components/ShareURLDialog.tsx";
 
 interface DrawerProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     setPath: (id: string, path: Point[]) => void;
+    id: string;
 }
+const encodeSettingsToUrl = (settings: ShareableSettings): string => {
+    const json = JSON.stringify(settings);
+    const base64 = btoa(json);
+    const url = new URL(window.location.href);
+    url.searchParams.set("cfg", base64);
+    return url.toString();
+};
 
-export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
+
+export default function Sidebar({isOpen, onOpenChange, setPath, id}: DrawerProps) {
 
     const [selectedSetting, setSelectedSetting] = useState("presets");
     const [selected, setSelected] = useState("presets");
-    const id = useIdStore((state) => state.activeId);
+    const [open, setOpen] = useState(false);
+
+    const currentRNGSettings = useRNGSettingsStore((state) => state.rngSettingsMap[id])
+    const {colorSettings, strokeSettings} = useColorStrokeStore((state) => state.settingsMap[id]);
+    const [encodedSettingsUrl, setEncodedSettingsUrl] = useState(encodeSettingsToUrl({rng: currentRNGSettings, color: colorSettings, stroke: strokeSettings}));
 
     const addPathWithCurrentId = (path: Point[]) => {
         if (id) {
             setPath(id, path);
         }
+    }
+
+    const onExportSettingsButtonClick = () => {
+        const url = encodeSettingsToUrl({rng: currentRNGSettings, color: colorSettings, stroke: strokeSettings});
+        console.log(url);
+        setEncodedSettingsUrl(url);
+        setOpen(true);
     }
 
     const selectionChange = (key: Key) => {
@@ -60,6 +84,9 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
                                 </Tab>
                             </Tabs>
                         </div>
+                        <div className={'w-full p-6 flex flex-col items-center '}>
+                            <Button onClick={onExportSettingsButtonClick}>Export Settings</Button>
+                        </div>
                         <div className={'w-full h-1/2 p-6 flex flex-col items-center '}>
                             <Tabs variant={'underlined'} size={'md'} selectedKey={selected}
                                   onSelectionChange={onSVGTabChange} aria-label="Options">
@@ -82,6 +109,11 @@ export default function Sidebar({isOpen, onOpenChange, setPath}: DrawerProps) {
                     <span className={'text-gray-600 text-xs'}>v1.0.0</span>
                 </DrawerFooter>
             </Drawer>
+            <ShareURLDialog
+                open={open}
+                onOpenChange={setOpen}
+                url={encodedSettingsUrl}
+            />
         </>
     );
 }

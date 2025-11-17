@@ -1,8 +1,15 @@
 import {useEffect, useState} from "react";
 import RNGCirclesRenderer from "@/components/fourier/RNGCirclesRenderer.tsx";
-import {Point, ViewPort} from "@/model/model.ts";
+import {ColorSettings, Point, RNGCirclesSettings, StrokeSettings, ViewPort} from "@/model/model.ts";
 import FourierTransformRenderer from "@/components/fourier/FourierTransformRenderer.tsx";
 import {useRNGSettingsStore} from "@/store/rng_settings.store.ts";
+
+export interface ShareableSettings {
+    rng: RNGCirclesSettings;
+    stroke: StrokeSettings;
+    color: ColorSettings;
+}
+
 
 // decides what to render, provides height and width limits,
 const AnimationControl = ({width, height, id, isPause, path}: {

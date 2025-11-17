@@ -13,7 +13,6 @@ export const usePathStore = create<PathStoreState>()(
     persist(
         immer((set) => ({
             paths: {},
-
             addPath: (id, points) =>
                 set((state) => {
                     state.paths[id] = points
