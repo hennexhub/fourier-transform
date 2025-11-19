@@ -81,9 +81,7 @@ function App() {
     useEffect(() => {
         const id = uuidv4();
         const loaded = decodeSettingsFromUrl();
-        console.log('init settings');
         if (loaded) {
-            console.log(loaded);
             addId(id);
             setActiveId(id);
             addColorStrokeSettings(id, {colorSettings: loaded.color, strokeSettings: loaded.stroke});
@@ -92,7 +90,7 @@ function App() {
             return;
         }
         //wait for local storage items to be set from the stores.
-        setTimeout(() => {
+        const timeOut = setTimeout(() => {
             if (!idRef.current) {
                 idRef.current = true;
                 addId(id);
@@ -101,6 +99,9 @@ function App() {
                 addRNGSettings(id, presets[0].rngSettings);
             }
         }, 50)
+        return () => {
+            clearTimeout(timeOut);
+        };
     }, [addColorStrokeSettings, addId, addRNGSettings, setActiveId]);
 
     // key event listener

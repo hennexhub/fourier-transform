@@ -1,4 +1,4 @@
-import {ColorSettings, FourierTransform, ICircle, Point, RNGCirclesSettings, ViewPort} from "@/model/model.ts";
+import {ColorSettings, FourierTransform, ICircle, RNGCirclesSettings, ViewPort} from "@/model/model.ts";
 
 export const generateHSLSteps = (startColor: number[], step: number, properties: RNGCirclesSettings): [number, number, number][] => {
     const [h, s, l] = startColor;

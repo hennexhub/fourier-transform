@@ -41,7 +41,7 @@ export const ShareURLDialog = ({
                     <Textarea
                         readOnly
                         value={url}
-                        className="h-32 resize-none font-mono"
+                        className="h-32 resize-none font-mono text-black bg-white"
                     />
                 </div>
 

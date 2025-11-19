@@ -93,9 +93,9 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
         // pause listener
         useEffect(() => {
             if (isPause) {
-                setSavedElapsed(() => currentFrequency * 1000);
+                setSavedElapsed((prevState) => prevState * 1000);
             }
-        }, [currentFrequency, isPause]);
+        }, [isPause]);
 
         // reset
         useEffect(() => {
