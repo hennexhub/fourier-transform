@@ -28,9 +28,12 @@ export const useRNGSettingsStore = create<RNGSettingsState>()(
                     }
                 })
             },
-            addRNGSettings: (id, settings) => set(state => {
-                state.rngSettingsMap[id] = settings
-            }),
+            addRNGSettings: (id, settings) => {
+                console.log('set rngsettings', id);
+                set(state => {
+                    state.rngSettingsMap[id] = settings
+                })
+            },
             updateRNGSettings: (id, updatedSettings) => {
                 usePathStore.getState().deletePath(id);
                     set(state => {

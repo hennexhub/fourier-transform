@@ -44,6 +44,10 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
             graph.attr("d", pathData);
         }, []);
 
+
+        useEffect(() => {
+            console.log('fourierSteps chaning');
+        }, [fourierSteps]);
         // calc circle props for rendering.
         const generateRandomFourierProps = useCallback((fourierProps: FourierTransform[]) => {
             if (!currentRNGSettings) {
@@ -129,6 +133,10 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
 
         }, [currentFrequency, strokeSettings, fourierSteps, renderPath, savedElapsed]);
 
+        useEffect(() => {
+            console.log('stroke settings chaning');
+        }, [strokeSettings]);
+
 
         return (
             <div className={'fourier-container'}>
@@ -141,9 +149,9 @@ const RNGCirclesRenderer: React.FC<FourierWrapperProps> = ({
                                     colorSettings={colorSettings}/>
                         )) : null}
                         {pathArrayRef.current.length > 0 ? <path ref={pathRef}
-                                                 stroke={getHslString(colorSettings.pathColor)}
-                                                 fill="none"
-                                                 strokeWidth={strokeSettings.pathStroke}/> : null
+                                                                 stroke={getHslString(colorSettings.pathColor)}
+                                                                 fill="none"
+                                                                 strokeWidth={strokeSettings.pathStroke}/> : null
                         }
                     </svg> : null
                 }

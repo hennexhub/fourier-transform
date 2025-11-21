@@ -47,7 +47,6 @@ export default function Sidebar({isOpen, onOpenChange, setPath, id}: DrawerProps
 
     const onExportSettingsButtonClick = () => {
         const url = encodeSettingsToUrl({rng: currentRNGSettings, color: colorSettings, stroke: strokeSettings});
-        console.log(url);
         setEncodedSettingsUrl(url);
         setOpen(true);
     }

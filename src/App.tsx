@@ -43,6 +43,7 @@ function App() {
     const idRef = useRef<boolean>(false);
 
 
+
     const onPauseButtonClick = useCallback(() => {
         setPause(prevState => !prevState);
         onOpenChange();
@@ -79,6 +80,7 @@ function App() {
 
 
     useEffect(() => {
+        console.log('init');
         const id = uuidv4();
         const loaded = decodeSettingsFromUrl();
         if (loaded) {
@@ -119,6 +121,7 @@ function App() {
             addPath(id, path);
         }
     };
+
     return (
         <>
             <HeroUIProvider>
