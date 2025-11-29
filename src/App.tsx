@@ -118,7 +118,7 @@ function App() {
     const adjustPathToViewPort = (id: string, path: Point[]) => {
         const transformedPath = transformPathToDimensions(path, width, height);
         if (transformedPath) {
-            addPath(id, path);
+            addPath(id, transformedPath);
         }
     };
 
