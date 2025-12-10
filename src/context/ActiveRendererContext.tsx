@@ -1,28 +1,32 @@
-import {createContext, SetStateAction, useContext, useState} from "react";
-
+import { createContext, SetStateAction, useContext, useState } from 'react';
 
 interface ActiveRendererContextType {
-    id: string;
-    setId: React.Dispatch<SetStateAction<string>>
+	id: string;
+	setId: React.Dispatch<SetStateAction<string>>;
 }
 
-const ActiveRendererContext = createContext<ActiveRendererContextType | undefined>(undefined);
+const ActiveRendererContext = createContext<
+	ActiveRendererContextType | undefined
+>(undefined);
 
+export function ActiveRendererIdProvider({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
+	const [id, setId] = useState<string>('');
 
-export function ActiveRendererIdProvider({ children }: { children: React.ReactNode }) {
-    const [id, setId] = useState<string>('');
-
-    return (
-        <ActiveRendererContext.Provider value={{id, setId}}>
-            {children}
-        </ActiveRendererContext.Provider>
-    );
+	return (
+		<ActiveRendererContext.Provider value={{ id, setId }}>
+			{children}
+		</ActiveRendererContext.Provider>
+	);
 }
 
 export function useActiveRendererId() {
-    const context = useContext(ActiveRendererContext);
-    if (!context) {
-        throw new Error("useSettings must be used within a SettingsProvider");
-    }
-    return context;
+	const context = useContext(ActiveRendererContext);
+	if (!context) {
+		throw new Error('useSettings must be used within a SettingsProvider');
+	}
+	return context;
 }

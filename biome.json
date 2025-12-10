@@ -1,0 +1,429 @@
+{
+	// JSON Schema for IDE autocomplete and validation (use "latest" for always current)
+	"$schema": "https://biomejs.dev/schemas/latest/schema.json",
+
+	// === VCS (VERSION CONTROL SYSTEM) INTEGRATION ===
+	"vcs": {
+		// Enable integration with your version control system
+		"enabled": true,
+
+		// Type of VCS client (currently only "git" is supported)
+		"clientKind": "git",
+
+		// Respect .gitignore and .ignore files when processing files
+		"useIgnoreFile": true,
+
+		// The main branch name for comparing changed files
+		"defaultBranch": "main"
+	},
+
+	// === FILES CONFIGURATION ===
+	"files": {
+		// Only process these file types (glob patterns)
+		// This includes JavaScript, TypeScript, JSON, and JSONC files
+		"includes": ["**/*.{js,mjs,ts,json,jsonc}"],
+
+		// Maximum file size in bytes (1MB = 1048576 bytes)
+		// Files larger than this are ignored for performance reasons
+		"maxSize": 1048576,
+
+		// Don't show errors for files with unknown extensions
+		// When true, Biome silently ignores files it doesn't recognize
+		"ignoreUnknown": true
+	},
+
+	// === FORMATTER CONFIGURATION ===
+	"formatter": {
+		// Maximum characters per line before wrapping
+		"lineWidth": 80,
+
+		// Use tabs for indentation (alternative: "space")
+		"indentStyle": "tab",
+
+		// Width of each indentation level (only applies when indentStyle is "space")
+		"indentWidth": 2,
+
+		// Line ending style: "lf" = Unix (\n), "crlf" = Windows (\r\n), "cr" = old Mac (\r)
+		"lineEnding": "lf"
+	},
+
+	// === LINTER CONFIGURATION ===
+	"linter": {
+		"rules": {
+			// === ACCESSIBILITY (a11y) ===
+			// Rules to prevent accessibility issues in web applications
+			"a11y": {
+				// Enable all recommended accessibility rules
+				"recommended": true
+			},
+
+			// === COMPLEXITY ===
+			// Rules that simplify complex code patterns
+			"complexity": {
+				// Disallow unnecessary boolean casts like !!true or Boolean(false)
+				"noExtraBooleanCast": "error",
+
+				// Disallow catch clauses that only rethrow the error
+				"noUselessCatch": "error"
+			},
+
+			// === CORRECTNESS ===
+			// Rules that catch guaranteed bugs or incorrect code
+			"correctness": {
+				// Prevent reassigning const variables
+				"noConstAssign": "error",
+
+				// Disallow constant conditions in if/while (e.g., if (true))
+				"noConstantCondition": "error",
+
+				// Disallow empty character classes in regex like /[]/
+				"noEmptyCharacterClassInRegex": "error",
+
+				// Disallow empty destructuring patterns like const {} = obj
+				"noEmptyPattern": "error",
+
+				// Prevent calling global objects as functions (Math(), JSON())
+				"noGlobalObjectCalls": "error",
+
+				// Ensure super() is called correctly in constructors
+				"noInvalidConstructorSuper": "error",
+
+				// Disallow \8 and \9 escape sequences (they're confusing)
+				"noNonoctalDecimalEscape": "error",
+
+				// Warn about numbers that lose precision (9007199254740993)
+				"noPrecisionLoss": "error",
+
+				// Disallow assigning a variable to itself (x = x)
+				"noSelfAssign": "error",
+
+				// Prevent return statements in setters
+				"noSetterReturn": "error",
+
+				// Disallow lexical declarations in switch case/default clauses
+				"noSwitchDeclarations": "error",
+
+				// Catch usage of variables that haven't been declared
+				"noUndeclaredVariables": "error",
+
+				// Detect code that can never be executed (after return/throw)
+				"noUnreachable": "error",
+
+				// Detect unreachable super() calls
+				"noUnreachableSuper": "error",
+
+				// Remove unused import statements automatically
+				"noUnusedImports": "error",
+
+				// Warn about function parameters that are never used
+				"noUnusedFunctionParameters": "warn",
+
+				// Prevent passing children as a prop in React (use JSX children instead)
+				"noChildrenProp": "error",
+
+				// Require using Number.isNaN() instead of isNaN()
+				"useIsNan": "error",
+
+				// Ensure for loops have valid direction (e.g., i++ with i < 10, not i > 10)
+				"useValidForDirection": "error",
+
+				// Require generator functions to have yield statements
+				"useYield": "error"
+			},
+
+			// === PERFORMANCE ===
+			// Rules that catch performance issues
+			"performance": {
+				// Warn about spread operators in loops (creates new arrays repeatedly)
+				// Bad: arr.reduce((acc, x) => [...acc, x], [])
+				"noAccumulatingSpread": "warn",
+
+				// Prevent using delete operator (it deoptimizes V8 engine)
+				// Use Map/Set or set property to undefined instead
+				"noDelete": "error"
+			},
+
+			// === SECURITY ===
+			// Rules to prevent security vulnerabilities
+			"security": {
+				// Disallow eval() - it's a major security risk
+				"noGlobalEval": "error"
+			},
+
+			// === STYLE ===
+			// Rules for consistent code style
+			"style": {
+				// Require explicit true/false in JSX props (no implicit true)
+				// Enforces <Component prop={true} /> instead of <Component prop />
+				"noImplicitBoolean": "error",
+
+				// Don't enforce removing negation from else (preference varies)
+				// Allows: if (!x) {} else {} instead of forcing if (x) {} else {}
+				"noNegationElse": "off",
+
+				// Warn when reassigning function parameters
+				// Helps avoid unexpected side effects
+				"noParameterAssign": "warn",
+
+				// Prevent use of specific global variables (configured elsewhere)
+				"noRestrictedGlobals": "error",
+
+				// Warn about SCREAMING_SNAKE_CASE constants (prefer camelCase)
+				"noShoutyConstants": "warn",
+
+				// Warn about template literals with no substitutions
+				// `hello` should just be 'hello'
+				"noUnusedTemplateLiteral": "warn",
+
+				// Enforce curly braces for all control statements
+				// Requires: if (x) { return; } instead of if (x) return;
+				"useBlockStatements": "error",
+
+				// Suggest collapsing nested else-if into else if
+				"useCollapsedElseIf": "warn",
+
+				// Enforce const for variables that are never reassigned
+				"useConst": "error",
+
+				// Put parameters with defaults at the end of parameter list
+				"useDefaultParameterLast": "error",
+
+				// Use ** instead of Math.pow() for exponentiation
+				"useExponentiationOperator": "error",
+
+				// Use Number.parseInt() instead of global parseInt()
+				"useNumberNamespace": "error",
+
+				// Enforce one variable declaration per statement
+				// Requires: const a = 1; const b = 2; not const a = 1, b = 2;
+				"useSingleVarDeclarator": "error",
+
+				// Suggest template literals over string concatenation
+				// Prefer: `Hello ${name}` over 'Hello ' + name
+				"useTemplate": "warn",
+
+				// Enforce consistent array type syntax in TypeScript
+				// Either Array<T> or T[] consistently
+				"useConsistentArrayType": "error",
+
+				// Prefer for-of loops over traditional for loops with arrays
+				"useForOf": "error",
+
+				// Use 'import type' for TypeScript type-only imports
+				// import type { MyType } from './types'
+				"useImportType": "error"
+			},
+
+			// === SUSPICIOUS ===
+			// Rules that catch likely bugs or confusing patterns
+			"suspicious": {
+				// Disallow assignments in expressions (if (x = 1) instead of if (x === 1))
+				"noAssignInExpressions": "error",
+
+				// Prevent async functions as Promise executor
+				// new Promise(async () => {}) is usually wrong
+				"noAsyncPromiseExecutor": "error",
+
+				// Don't reassign catch clause parameters
+				"noCatchAssign": "error",
+
+				// Don't reassign class declarations
+				"noClassAssign": "error",
+
+				// Prevent comments in JSX using // instead of {/* */}
+				"noCommentText": "error",
+
+				// Disallow comparing to negative zero (-0)
+				"noCompareNegZero": "error",
+
+				// Warn about console statements (usually want to remove before production)
+				"noConsole": "warn",
+
+				// Disallow control characters in regular expressions
+				"noControlCharactersInRegex": "error",
+
+				// Prevent debugger statements (should be removed before production)
+				"noDebugger": "error",
+
+				// Enforce === and !== instead of == and !=
+				"noDoubleEquals": "error",
+
+				// Prevent duplicate case labels in switch statements
+				"noDuplicateCase": "error",
+
+				// Prevent duplicate class members
+				"noDuplicateClassMembers": "error",
+
+				// Prevent duplicate keys in object literals
+				"noDuplicateObjectKeys": "error",
+
+				// Prevent duplicate parameters in function declarations
+				"noDuplicateParameters": "error",
+
+				// Disallow empty block statements (should have code or comment)
+				"noEmptyBlockStatements": "error",
+
+				// Warn about explicit 'any' type in TypeScript (loses type safety)
+				"noExplicitAny": "warn",
+
+				// Prevent unnecessary non-null assertions in TypeScript (x!!)
+				"noExtraNonNullAssertion": "error",
+
+				// Require break/return in switch cases (prevents fallthrough bugs)
+				"noFallthroughSwitchClause": "error",
+
+				// Prevent reassigning function declarations
+				"noFunctionAssign": "error",
+
+				// Prevent assigning to global/restricted names
+				"noGlobalAssign": "error",
+
+				// Prevent reassigning imported bindings
+				"noImportAssign": "error",
+
+				// Catch misleading regex character classes like [A-z]
+				"noMisleadingCharacterClass": "error",
+
+				// Prevent calling Object.prototype methods directly on objects
+				// Use Object.prototype.hasOwnProperty.call(obj, key) instead
+				"noPrototypeBuiltins": "error",
+
+				// Prevent variable redeclaration in same scope
+				"noRedeclare": "error",
+
+				// Prevent shadowing restricted names like 'undefined'
+				"noShadowRestrictedNames": "error",
+
+				// Prevent unsafe TypeScript declaration merging
+				"noUnsafeDeclarationMerging": "error",
+
+				// Prevent confusing negation in expressions (!(a == b) vs (!a) == b)
+				"noUnsafeNegation": "error",
+
+				// Prevent .only() in tests (should only be temporary)
+				"noFocusedTests": "error",
+
+				// Warn about .skip() in tests (might forget to re-enable)
+				"noSkippedTests": "warn",
+
+				// TypeScript: Keep overload signatures together
+				"useAdjacentOverloadSignatures": "error",
+
+				// Ensure getters have a return statement
+				"useGetterReturn": "error"
+			},
+
+			// === NURSERY ===
+			// Experimental rules still under development (opt-in only)
+			"nursery": {
+				// Warn when function return types aren't explicitly specified (TypeScript)
+				// Helps catch type inference issues early
+				"useExplicitType": "warn"
+			}
+		}
+	},
+
+	// === JAVASCRIPT/TYPESCRIPT SPECIFIC SETTINGS ===
+	"javascript": {
+		// Global variables that should be recognized (won't trigger noUndeclaredVariables)
+		// Useful for Node.js and Bun globals
+		"globals": [
+			"console", // Console API
+			"process", // Node.js process object
+			"Buffer", // Node.js Buffer class
+			"__dirname", // Node.js directory name
+			"__filename", // Node.js file name
+			"Bun" // Bun runtime global
+		],
+
+		"formatter": {
+			// Use single quotes for strings instead of double quotes
+			"quoteStyle": "single",
+
+			// Always add semicolons at the end of statements
+			"semicolons": "always",
+
+			// Add trailing commas only where valid in ES5 (objects, arrays, not function params)
+			"trailingCommas": "es5"
+		}
+	},
+
+	// === JSON SPECIFIC SETTINGS ===
+	"json": {
+		"parser": {
+			// Allow comments in JSON files (JSONC format)
+			// Useful for config files that support comments
+			"allowComments": true
+		}
+	},
+
+	// === ASSIST (CODE ACTIONS) ===
+	"assist": {
+		"actions": {
+			"source": {
+				// Automatically organize/sort imports on save
+				// Removes unused imports and groups them logically
+				"organizeImports": "on"
+			}
+		}
+	},
+
+	// === OVERRIDES ===
+	// Apply different rules to specific file patterns
+	"overrides": [
+		{
+			// Test files can have more relaxed rules
+			"includes": [
+				"*.test.{js,ts}", // Files ending in .test.js or .test.ts
+				"*.spec.{js,ts}", // Files ending in .spec.js or .spec.ts
+				"**/__tests__/**", // Everything in __tests__ folders
+				"**/test/**", // Everything in test folders
+				"**/tests/**" // Everything in tests folders
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						// Allow console.log in tests (useful for debugging)
+						"noConsole": "off"
+					},
+					"style": {
+						// Allow implicit boolean props in JSX in tests
+						"noImplicitBoolean": "off"
+					}
+				}
+			}
+		},
+		{
+			// Configuration files often need default exports and console
+			"includes": [
+				"*.config.{js,ts,mjs}", // General config files
+				"*.setup.{js,ts}", // Setup files
+				"vite.config.*", // Vite config (any extension)
+				"vitest.config.*", // Vitest config
+				"playwright.config.*" // Playwright config
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						// Allow default exports in config files (often required)
+						"noDefaultExport": "off"
+					},
+					"suspicious": {
+						// Allow console in config files (useful for build logs)
+						"noConsole": "off"
+					}
+				}
+			}
+		},
+		{
+			// package.json should be strict JSON (no comments)
+			"includes": ["package.json"],
+			"json": {
+				"parser": {
+					// Don't allow comments in package.json (npm/yarn don't support them)
+					"allowComments": false
+				}
+			}
+		}
+	]
+}
